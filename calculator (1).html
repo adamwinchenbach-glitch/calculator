@@ -1,0 +1,155 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Basic Calculator</title>
+  <style>
+    * { box-sizing: border-box; }
+    body {
+      margin: 0; min-height: 100vh; display: flex;
+      justify-content: center; align-items: center;
+      background: #f2f2f2; font-family: Arial, sans-serif;
+    }
+    .calculator {
+      width: 320px; background: white; padding: 20px;
+      border-radius: 16px; box-shadow: 0 8px 25px rgba(0,0,0,.15);
+    }
+    #display {
+      width: 100%; height: 75px; margin-bottom: 15px; padding: 10px;
+      border: 2px solid #ddd; border-radius: 10px;
+      font-size: 32px; text-align: right; background: #fafafa;
+    }
+    .buttons { display: grid; grid-template-columns: repeat(4, 1fr); gap: 10px; }
+    button {
+      height: 60px; border: none; border-radius: 10px;
+      font-size: 22px; cursor: pointer; background: #e9e9e9;
+    }
+    button:hover { background: #d9d9d9; }
+    .operator { background: #d8e8ff; }
+    .clear { background: #ffd7d7; }
+    .equals { background: #ccefd5; grid-row: span 2; height: 130px; }
+    .zero { grid-column: span 2; }
+  
+    .fullscreen-btn {
+      position: fixed;
+      top: 16px;
+      right: 16px;
+      width: 46px;
+      height: 46px;
+      margin: 0;
+      padding: 0;
+      border: none;
+      border-radius: 10px;
+      background: white;
+      font-size: 24px;
+      line-height: 46px;
+      cursor: pointer;
+      box-shadow: 0 4px 14px rgba(0, 0, 0, 0.15);
+      z-index: 1000;
+    }
+
+    .fullscreen-btn:hover {
+      background: #eeeeee;
+    }
+
+    :fullscreen .calculator,
+    :-webkit-full-screen .calculator {
+      width: min(92vw, 520px);
+      padding: 28px;
+    }
+
+    :fullscreen #display,
+    :-webkit-full-screen #display {
+      height: 100px;
+      font-size: 44px;
+    }
+
+    :fullscreen .buttons button,
+    :-webkit-full-screen .buttons button {
+      height: 78px;
+      font-size: 28px;
+    }
+
+    :fullscreen .buttons .equals,
+    :-webkit-full-screen .buttons .equals {
+      height: 166px;
+    }
+  </style>
+</head>
+<body>
+  <button
+    class="fullscreen-btn"
+    id="fullscreenButton"
+    onclick="toggleFullscreen()"
+    aria-label="Toggle full screen"
+    title="Full screen">⛶</button>
+  <div class="calculator">
+    <input type="text" id="display" readonly>
+    <div class="buttons">
+      <button class="clear" onclick="clearDisplay()">C</button>
+      <button onclick="deleteLast()">⌫</button>
+      <button class="operator" onclick="addToDisplay('/')">÷</button>
+      <button class="operator" onclick="addToDisplay('*')">×</button>
+      <button onclick="addToDisplay('7')">7</button>
+      <button onclick="addToDisplay('8')">8</button>
+      <button onclick="addToDisplay('9')">9</button>
+      <button class="operator" onclick="addToDisplay('-')">−</button>
+      <button onclick="addToDisplay('4')">4</button>
+      <button onclick="addToDisplay('5')">5</button>
+      <button onclick="addToDisplay('6')">6</button>
+      <button class="operator" onclick="addToDisplay('+')">+</button>
+      <button onclick="addToDisplay('1')">1</button>
+      <button onclick="addToDisplay('2')">2</button>
+      <button onclick="addToDisplay('3')">3</button>
+      <button class="equals" onclick="calculate()">=</button>
+      <button class="zero" onclick="addToDisplay('0')">0</button>
+      <button onclick="addToDisplay('.')">.</button>
+    </div>
+  </div>
+  <script>
+    const display = document.getElementById("display");
+    function addToDisplay(value) {
+      if (display.value === "Error") display.value = "";
+      display.value += value;
+    }
+    function clearDisplay() { display.value = ""; }
+    function deleteLast() { display.value = display.value.slice(0, -1); }
+    function calculate() {
+      try {
+        const expr = display.value;
+        if (!/^[0-9+\-*/.() ]+$/.test(expr)) throw new Error();
+        display.value = Function('"use strict"; return (' + expr + ')')();
+      } catch {
+        display.value = "Error";
+      }
+    }
+
+    function toggleFullscreen() {
+      const page = document.documentElement;
+
+      if (!document.fullscreenElement && !document.webkitFullscreenElement) {
+        if (page.requestFullscreen) {
+          page.requestFullscreen();
+        } else if (page.webkitRequestFullscreen) {
+          page.webkitRequestFullscreen();
+        }
+      } else {
+        if (document.exitFullscreen) {
+          document.exitFullscreen();
+        } else if (document.webkitExitFullscreen) {
+          document.webkitExitFullscreen();
+        }
+      }
+    }
+
+    document.addEventListener("keydown", function(event) {
+      const allowedKeys = "0123456789+-*/.";
+      if (allowedKeys.includes(event.key)) addToDisplay(event.key);
+      else if (event.key === "Enter") calculate();
+      else if (event.key === "Backspace") deleteLast();
+      else if (event.key === "Escape") clearDisplay();
+    });
+  </script>
+</body>
+</html>
